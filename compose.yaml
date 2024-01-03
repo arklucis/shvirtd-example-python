@@ -1,0 +1,62 @@
+version: "3"
+# The parser will ignore extension fields prefixed with x-
+x-deploy: &deploy-dev
+  deploy:
+    resources:
+      limits:
+        cpus: "1"
+        memory: 256M
+      reservations:
+        memory: 128M
+x-env_file: &env_file
+  env_file:
+    - .env
+x-restart: &restart
+  restart: always #no, on-failure , always(default), unless-stopped 
+
+services:
+  db:
+    image: mysql:8
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      backend:
+         ipv4_address: 172.20.0.10
+    ports:
+      - 3306:3306
+    <<: [*deploy-dev, *env_file, *restart]
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=web
+      - MYSQL_USER=flask
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  web:
+    depends_on: ["db"]
+    build:
+      context: /root/shvirtd-example-python
+      dockerfile: Dockerfile.python
+    volumes:
+      - web_data:/var/www/html
+    networks:
+      backend:
+        ipv4_address: 172.20.0.5
+    ports:
+      - 8080:5000
+      - 8090:5000
+    <<: [*deploy-dev, *env_file, *restart]
+    environment:
+      - DB_NAME=web
+      - DB_USER=flask
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_HOST=db
+volumes:
+  db_data: {}
+  web_data: {}
+networks:
+  backend:
+    driver: bridge
+    name: backend
+    ipam:
+     config:
+       - subnet: 172.20.0.0/24
