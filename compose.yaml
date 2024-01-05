@@ -35,7 +35,7 @@ services:
   web:
     depends_on: ["db"]
     build:
-      context: /home/alekc/shvirtd-example-python
+      context: /opt/shvirtd-example-python
       dockerfile: Dockerfile.python
     volumes:
       - web_data:/var/www/html
@@ -58,6 +58,7 @@ services:
     networks:
         backend: {}
     ports:
+    - 5000:8080
     - "127.0.0.1:8080:8080"
     volumes:
     - ./haproxy/reverse/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:rw
