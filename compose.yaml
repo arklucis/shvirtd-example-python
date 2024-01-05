@@ -5,7 +5,7 @@ x-deploy: &deploy-dev
     resources:
       limits:
         cpus: "1"
-        memory: 256M
+        memory: 512M
       reservations:
         memory: 128M
 x-env_file: &env_file
@@ -16,7 +16,7 @@ x-restart: &restart
 
 services:
   db:
-    image: mysql:8
+    image: mysql:8.2.0
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -30,11 +30,12 @@ services:
       - MYSQL_DATABASE=web
       - MYSQL_USER=flask
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_HOST="%"
 
   web:
     depends_on: ["db"]
     build:
-      context: /root/shvirtd-example-python
+      context: /home/alekc/shvirtd-example-python
       dockerfile: Dockerfile.python
     volumes:
       - web_data:/var/www/html
