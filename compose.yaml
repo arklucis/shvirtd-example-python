@@ -5,7 +5,7 @@ x-deploy: &deploy-dev
     resources:
       limits:
         cpus: "1"
-        memory: 512M
+        memory: 256M
       reservations:
         memory: 128M
 x-env_file: &env_file
@@ -16,7 +16,8 @@ x-restart: &restart
 
 services:
   db:
-    image: mysql:8.2.0
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -35,7 +36,7 @@ services:
   web:
     depends_on: ["db"]
     build:
-      context: /opt/shvirtd-example-python
+      context: /home/achernov/shvirtd-example-python
       dockerfile: Dockerfile.python
     volumes:
       - web_data:/var/www/html
